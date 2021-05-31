@@ -34,6 +34,9 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     backgroundColor: 'transparent'
   },
+  bold: {
+    fontWeight: 600
+  },
 }));
 
 const ShowBrackets = ({ data, length }) => {
@@ -100,19 +103,19 @@ export default function Tree({
                   <ListItem button className={classes.nested}>
                     {!Array.isArray(data) ? (
                         <>
-                        <Grid item xs={2}>                          
+                        <Grid item xs={3}>                          
                             <ListItemText classes={{ root: classes.listItemText }}>
                               {k}
                             </ListItemText>
                         </Grid>
-                        <Grid item xs={1} justify='center'>
-                            :
+                        <Grid item xs={2} justify='center'>
+                          <Typography variant="inherit" className={classes.bold}>:</Typography>
                         </Grid>
                         </>
                     ) : (
                       ""
                     )}
-                      <Grid item xs={9}>                          
+                      <Grid item xs={7}>                          
                           <ListItemText>
                             {data[k] === null ? "null" : data[k].toString()}
                           </ListItemText>

@@ -1,4 +1,6 @@
 import React, {useState, useEffect } from 'react'
+import {useSelector, useDispatch} from 'react-redux';
+
 import PeopleOutlineTwoToneIcon from '@material-ui/icons/PeopleOutlineTwoTone';
 // import PageHeader from '../../components/PageHeader'
 import { Grid, Button, Tooltip, Icon, Paper, makeStyles } from '@material-ui/core';
@@ -6,11 +8,16 @@ import IconButton from '@material-ui/core/IconButton';
 import SendOutlinedIcon from '@material-ui/icons/SendOutlined';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
+
+import ChevronRightRoundedIcon from '@material-ui/icons/ChevronRightRounded';
+
 import JSONFileRead from './JSONFileRead';
 import JSONFileUpdate from './JSONFileUpdate';
 import Tree from "./Tree";
 import TreeUpdate from "./TreeUpdate";
 import { CircularProgress } from "@material-ui/core";
+
+import {updating_json} from '../actions'
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -26,11 +33,16 @@ const useStyles = makeStyles(theme => ({
         textAlign: 'center',
         color: theme.palette.text.secondary,
         height: "500px",
-        overflow: 'auto'
+        overflow: 'auto',
+        elevation: 1,
       },
     button: {
         margin: theme.spacing(1),
       },
+    buttonDisable: {
+        margin: theme.spacing(1),
+        backgroundColor: 'red',
+    },  
     centerGridItem: {
         display: "grid",
         justifyContent: "center",
@@ -38,30 +50,33 @@ const useStyles = makeStyles(theme => ({
     }  
 }))
 
-function Editor({data,length,loading}) {
+
+
+function Editor() {
     
     const classes = useStyles();
-    const [json, setJson] = React.useState([]);
-    const [lengthJson, setJsonLength] = React.useState(0);
-    const [forwardClicked, setForwardClicked] = React.useState(false);
+    const dispatch = useDispatch();
 
-    const handleUpdate = () => {        
-        setJson(data);
-        setJsonLength(data.length);
-        setForwardClicked(true);
-    }
+    const currentState = useSelector(state => state.jsonReducer);
+
+    const [btnDisabled, setBtnDisabled] = useState(true);
+    const [updateClicked, setUpdateClicked] = React.useState(false);
+
+     const handleUpdate = () => {  
+         setUpdateClicked(true);
+         dispatch(updating_json());
+     }
     
-    const handleClear = () => {        
-        setJson(json);
-        setJsonLength(length);
-        setForwardClicked(false);
-    }
+    // const handleClear = () => {        
+    //     setJson(json);
+    //     setJsonLength(length);
+    //     setForwardClicked(false);
+    // }
 
-    useEffect(() => {
-        setJson([]);
-        setJsonLength(0);
-        setForwardClicked(false);
-    }, [data]);
+    useEffect(() => {        
+        setUpdateClicked(false);
+        setBtnDisabled(true);
+    }, [currentState.jsonData]);
 
     return (
         <> 
@@ -69,37 +84,42 @@ function Editor({data,length,loading}) {
                 <form>
                     <Grid container spacing={2}>
                         <Grid item xs={5}>
-                            <Paper className={classes.paper}>
-                                {/* <JSONFileRead data={data} length={length}/> */}
-                                {data.length > 0 ? <Tree data={data} length={length} /> : null }
+                            <Paper variant="elevation" className={classes.paper}>
+                                {/* <JSONFileRead data={currentState.jsonData} length={Object.keys(currentState.jsonData).length}/> */}
+                                {Object.keys(currentState.jsonData).length > 0 ? <Tree data={currentState.jsonData} length={Object.keys(currentState.jsonData).length} /> : null }
                             </Paper>
                         </Grid>
                         <Grid item xs={2} className={classes.centerGridItem}>
                             <Tooltip title="Update the contents in the right panel">
+                                
                                 <Button
                                     variant="outlined"
                                     color="primary"
                                     className={classes.button}
                                     endIcon={<ArrowForwardIosIcon>send</ArrowForwardIosIcon>}
-                                    onClick={handleUpdate}>
+                                    disabled={Object.keys(currentState.jsonData).length > 0 ? false : true}
+                                    onClick={handleUpdate}
+                                    className={classes.button}>
                                     Update
                                 </Button>
+                                
                             </Tooltip>
-                            <Tooltip title="Clear">
+                            <Tooltip title="Undo">
                                     <Button
                                         variant="outlined"
                                         color="primary"
                                         className={classes.button}
-                                        endIcon={<ArrowForwardIosIcon>send</ArrowForwardIosIcon>}
-                                        onClick={handleClear}>
-                                        Clear
+                                        disabled={Object.keys(currentState.jsonData).length > 0 ? false : true}>
+                                        {/* endIcon={<ArrowForwardIosIcon>send</ArrowForwardIosIcon>} */}
+                                        {/* onClick={handleClear} */}
+                                        Undo
                                     </Button>
                             </Tooltip>
                         </Grid>
                         <Grid item xs={5}>
-                            <Paper className={classes.paper}>
+                            <Paper variant="elevation" className={classes.paper}>
                                 {/* <JSONFileUpdate></JSONFileUpdate> */}
-                                {forwardClicked ? <TreeUpdate data={json} length={lengthJson} /> : null }
+                                {updateClicked ? <TreeUpdate data={eval(currentState.jsonData)} length={Object.keys(eval(currentState.jsonData)).length} /> : null }
                             </Paper>
                         </Grid>
                     </Grid>

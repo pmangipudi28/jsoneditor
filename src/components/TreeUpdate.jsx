@@ -3,6 +3,8 @@ import { Grid, Paper, Typography, TextField, Collapse, List, ListItem, ListItemI
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import ChevronRight from "@material-ui/icons/ChevronRight";
+import {useSelector, useDispatch} from 'react-redux';
+import {fetch_json_request, fetch_json_success, fetch_json_failure} from '../actions'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -33,6 +35,9 @@ const useStyles = makeStyles((theme) => ({
   paper2: {    
     textAlign: 'center',
     backgroundColor: 'transparent'
+  },  
+  bold: {
+    fontWeight: 600
   },
 }));
 
@@ -52,11 +57,24 @@ export default function TreeUpdate({
   parentName = "Root",
 }) {
   const classes = useStyles();
+  const dispatch = useDispatch();
+
+  const currentState = useSelector(state => state.jsonReducer);
+
   const [open, setOpen] = React.useState(false);
 
   const handleClick = () => {
     setOpen(!open);
   };
+
+  const handleUpdate = data => {
+    try{
+      dispatch(fetch_json_success(eval(JSON.parse(JSON.stringify(data)))));
+    }
+    catch {
+      dispatch(fetch_json_success(JSON.parse(eval(JSON.stringify(unescape(data))))));
+    }
+  }
   
 
   return (
@@ -101,21 +119,21 @@ export default function TreeUpdate({
                   <ListItem button className={classes.nested}>
                     {!Array.isArray(data) ? (
                         <>
-                        <Grid item xs={2}>                          
+                        <Grid item xs={3}>                          
                             <ListItemText classes={{ root: classes.listItemText }}>
                               {k}
                             </ListItemText>
                         </Grid>
-                        <Grid item xs={1} justify='center'>
-                            :
+                        <Grid item xs={2} justify='center'>
+                            <Typography variant="inherit" className={classes.bold}>:</Typography>
                         </Grid>
                         </>
                     ) : (
                       ""
                     )}
-                      <Grid item xs={9}>                          
+                      <Grid item xs={7}>                          
                           <ListItemText>
-                          {data[k] === null ? "null" : <TextField  defaultValue={data[k].toString()} />}
+                          {data[k] === null ? "null" : <TextField  defaultValue={data[k].toString()} fullWidth="true" onChange={handleUpdate} />}
                           </ListItemText>
                       </Grid>
                   </ListItem>

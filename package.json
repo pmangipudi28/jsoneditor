@@ -5,18 +5,22 @@
   "dependencies": {
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
-    "@material-ui/lab": "*",
-    "@naisutech/react-tree": "^0.4.2",
+    "@material-ui/lab": "*",    
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.6",
     "@testing-library/user-event": "^12.8.3",
+    "axios": "^0.21.1",
     "material-ui-treeview": "^5.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-redux": "^7.2.4",
     "react-scripts": "4.0.3",
     "react-simple-tree-menu": "^1.1.18",
+    "redux": "^4.1.0",
+    "redux-thunk": "^2.3.0",
     "uuidv4": "^6.2.8",
-    "web-vitals": "^1.1.2"
+    "web-vitals": "^1.1.2",
+    "xtypejs": "^0.7.1"
   },
   "scripts": {
     "start": "react-scripts start",
