@@ -3,6 +3,8 @@ import { Grid, Paper, Typography, Collapse, List, ListItem, ListItemIcon, ListIt
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import ChevronRight from "@material-ui/icons/ChevronRight";
+import ArrowRightIcon from '@material-ui/icons/ArrowRight';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -73,7 +75,7 @@ export default function Tree({
             key={Math.random() * 10}
             classes={{ root: classes.listIcon }}
           >
-            {open ? <ExpandMore /> : <ChevronRight />}
+            {open ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
           </ListItemIcon>
           <ListItemText key={Math.random() * 10}>
             <b>{parentName} </b>

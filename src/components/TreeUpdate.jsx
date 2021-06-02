@@ -1,10 +1,15 @@
-import React from "react";
-import { Grid, Paper, Typography, TextField, Collapse, List, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import React, {useState, useEffect} from "react";
+import {useSelector, useDispatch} from 'react-redux';
+
+import { Grid, Paper, Badge, TextField, Typography, Collapse, List, ListItem, ListItemIcon, ListItemText, IconButton } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import ChevronRight from "@material-ui/icons/ChevronRight";
-import {useSelector, useDispatch} from 'react-redux';
-import {fetch_json_request, fetch_json_success, fetch_json_failure} from '../actions'
+import ArrowRightIcon from '@material-ui/icons/ArrowRight';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import SaveOutlinedIcon from '@material-ui/icons/SaveOutlined';
+
+import {fetch_json_request, fetch_json_success, fetch_json_failure, update_json} from '../actions'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
   paper2: {    
     textAlign: 'center',
     backgroundColor: 'transparent'
-  },  
+  },
   bold: {
     fontWeight: 600
   },
@@ -51,35 +56,90 @@ const ShowBrackets = ({ data, length }) => {
   );
 };
 
+export function updateObject(obj, keys, value) {
+  console.log("IN FUNCTION updateObject..................");
+  console.log(obj);
+  let key = keys.shift();
+  // console.log(key);
+  if (keys.length > 0) {
+    // console.log("A1");
+    let tmp = updateObject(obj[key], keys, value);
+    return {...obj, [key]: tmp};
+  } else {
+    // console.log("A2");
+    return {...obj, [key]: value};
+  }
+}
+
 export default function TreeUpdate({
   data,
   length,
   parentName = "Root",
 }) {
+  
   const classes = useStyles();
-  const dispatch = useDispatch();
-
   const currentState = useSelector(state => state.jsonReducer);
-
+  
+  
+  const dispatch = useDispatch();
+  
   const [open, setOpen] = React.useState(false);
+  const [json, setJson] = React.useState([]);
+  const [updatedJSON, setUpdatedJSON] = React.useState([]);
+  const [jsonLength, setJsonLength] = React.useState([]);
 
+  const [updatedJson, setUpdatedJson] = React.useState([]);
+  
   const handleClick = () => {
     setOpen(!open);
   };
 
-  const handleUpdate = data => {
-    try{
-      dispatch(fetch_json_success(eval(JSON.parse(JSON.stringify(data)))));
-    }
-    catch {
-      dispatch(fetch_json_success(JSON.parse(eval(JSON.stringify(unescape(data))))));
-    }
+  const handleChange = (event) => {
+    // console.log("Before Update......");
+    // dispatch(update_json(event.target.id, event.target.value));
+    // console.log("After Update......");  
+    
+    // console.log(json);
+    
+    // setJson({...json, 
+    //       jsonData: {
+    //           [event.target.id]: event.target.value
+    //   }});
+
+    // setJson({     
+    //   ...json,
+    //   [event.target.id]: event.target.value
+    // });
+
+    // setJson({
+    //   json: {
+    //     ...json,
+    //     [event.target.id]: {           
+    //       [event.target.id]: event.target.value
+    //     }  
+    //   }
+    // });
+
+    setJson(updateObject(json, event.target.name.split('.'), event.target.value));
+    
+    
   }
-  
+
+  // This is to set Redux Store JSON into a React Hooks Json Object
+  useEffect(() => {
+    setJson(data);
+    setJsonLength(length);
+  }, [data]);
+
+  // useEffect(() => {  
+  //  console.log("......Updated JSON......");
+  //  console.log(json);
+  // }, [json]);
 
   return (
     <>
-      {data && (
+
+      {json && (
         <ListItem
           button
           onClick={handleClick}
@@ -89,11 +149,11 @@ export default function TreeUpdate({
             key={Math.random() * 10}
             classes={{ root: classes.listIcon }}
           >
-            {open ? <ExpandMore /> : <ChevronRight />}
+            {open ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
           </ListItemIcon>
           <ListItemText key={Math.random() * 10}>
             <b>{parentName} </b>
-            {!open && <ShowBrackets data={data} length={length} />}
+            {!open && <ShowBrackets data={json} length={jsonLength} />}
           </ListItemText>
         </ListItem>
       )}
@@ -104,20 +164,20 @@ export default function TreeUpdate({
         style={{ paddingLeft: "30px" }}
       >
         <List component="div" style={{ padding: 0 }}>
-          {data &&
-            Object.keys(data).map((k, i) => {
-              return data[k] != null && typeof data[k] === "object" ? (
-                <TreeUpdate 
+          {json &&
+            Object.keys(json).map((k, i) => {
+              return json[k] != null && typeof json[k] === "object" ? (
+                <TreeUpdate
                   key={Math.random()}
-                  data={data[k]}
-                  parentName={Array.isArray(data) ? "" : k}
-                  length={Object.keys(data[k]).length}
+                  data={json[k]}
+                  parentName={Array.isArray(json) ? "" : k}
+                  length={Object.keys(json[k]).length}
                 />
               ) : (
                 <>
                 <Grid container spacing={2}>
                   <ListItem button className={classes.nested}>
-                    {!Array.isArray(data) ? (
+                    {!Array.isArray(json) ? (
                         <>
                         <Grid item xs={3}>                          
                             <ListItemText classes={{ root: classes.listItemText }}>
@@ -125,7 +185,7 @@ export default function TreeUpdate({
                             </ListItemText>
                         </Grid>
                         <Grid item xs={2} justify='center'>
-                            <Typography variant="inherit" className={classes.bold}>:</Typography>
+                          <Typography variant="inherit" className={classes.bold}>:</Typography>
                         </Grid>
                         </>
                     ) : (
@@ -133,7 +193,7 @@ export default function TreeUpdate({
                     )}
                       <Grid item xs={7}>                          
                           <ListItemText>
-                          {data[k] === null ? "null" : <TextField  defaultValue={data[k].toString()} fullWidth="true" onChange={handleUpdate} />}
+                            {json[k] === null ? "null" : <TextField name={k} defaultValue={json[k].toString() || ''} onChange={handleChange} /> }                            
                           </ListItemText>
                       </Grid>
                   </ListItem>

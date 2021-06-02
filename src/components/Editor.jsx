@@ -11,8 +11,7 @@ import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 
 import ChevronRightRoundedIcon from '@material-ui/icons/ChevronRightRounded';
 
-import JSONFileRead from './JSONFileRead';
-import JSONFileUpdate from './JSONFileUpdate';
+
 import Tree from "./Tree";
 import TreeUpdate from "./TreeUpdate";
 import { CircularProgress } from "@material-ui/core";
@@ -45,7 +44,7 @@ const useStyles = makeStyles(theme => ({
     },  
     centerGridItem: {
         display: "grid",
-        justifyContent: "center",
+        // justifyContent: "center",
         alignContent: "center"
     }  
 }))
@@ -74,7 +73,7 @@ function Editor() {
     // }
 
     useEffect(() => {        
-        setUpdateClicked(false);
+        //setUpdateClicked(true);
         setBtnDisabled(true);
     }, [currentState.jsonData]);
 

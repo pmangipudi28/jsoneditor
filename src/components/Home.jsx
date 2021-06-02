@@ -6,8 +6,7 @@ import Editor from '../components/Editor'
 
 function Home() {
     
-    const currentState = useSelector(state => state.jsonReducer);
-    console.log(currentState.jsonData);
+
 
     return (
         <div>
