@@ -73,7 +73,7 @@ function Editor() {
     // }
 
     useEffect(() => {        
-        //setUpdateClicked(true);
+        setUpdateClicked(false);
         setBtnDisabled(true);
     }, [currentState.jsonData]);
 
@@ -118,7 +118,7 @@ function Editor() {
                         <Grid item xs={5}>
                             <Paper variant="elevation" className={classes.paper}>
                                 {/* <JSONFileUpdate></JSONFileUpdate> */}
-                                {updateClicked ? <TreeUpdate data={eval(currentState.jsonData)} length={Object.keys(eval(currentState.jsonData)).length} /> : null }
+                                {updateClicked  && Object.keys(eval(currentState.jsonData)).length > 0 ? <TreeUpdate data={eval(currentState.jsonData)} length={Object.keys(eval(currentState.jsonData)).length} /> : null }
                             </Paper>
                         </Grid>
                     </Grid>

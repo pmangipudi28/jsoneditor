@@ -1,5 +1,7 @@
 import React, {useState, useEffect} from "react";
 import {useSelector, useDispatch} from 'react-redux';
+import { useImmer } from 'use-immer';
+import { simplify, desimplify } from 'simplifr';
 
 import { Grid, Paper, Badge, TextField, Typography, Collapse, List, ListItem, ListItemIcon, ListItemText, IconButton } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
@@ -9,7 +11,7 @@ import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import SaveOutlinedIcon from '@material-ui/icons/SaveOutlined';
 
-import {fetch_json_request, fetch_json_success, fetch_json_failure, update_json} from '../actions'
+import {update_json} from '../updateActions'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -25,6 +27,7 @@ const useStyles = makeStyles((theme) => ({
   },
   listItemText: {
     flex: "0 1 auto",
+    paddingRight: '50px'
   },
   body1: {
     fontWeight: "bold",
@@ -56,20 +59,6 @@ const ShowBrackets = ({ data, length }) => {
   );
 };
 
-export function updateObject(obj, keys, value) {
-  console.log("IN FUNCTION updateObject..................");
-  console.log(obj);
-  let key = keys.shift();
-  // console.log(key);
-  if (keys.length > 0) {
-    // console.log("A1");
-    let tmp = updateObject(obj[key], keys, value);
-    return {...obj, [key]: tmp};
-  } else {
-    // console.log("A2");
-    return {...obj, [key]: value};
-  }
-}
 
 export default function TreeUpdate({
   data,
@@ -79,66 +68,43 @@ export default function TreeUpdate({
   
   const classes = useStyles();
   const currentState = useSelector(state => state.jsonReducer);
-  
-  
+
   const dispatch = useDispatch();
   
   const [open, setOpen] = React.useState(false);
-  const [json, setJson] = React.useState([]);
-  const [updatedJSON, setUpdatedJSON] = React.useState([]);
-  const [jsonLength, setJsonLength] = React.useState([]);
+  const [json, setJson] = useImmer(simplify(data));
+  const [updatedJSON, setUpdatedJSON] = useImmer(data);
+  const [jsonLength, setJsonLength] = useImmer(length);
 
-  const [updatedJson, setUpdatedJson] = React.useState([]);
+  const [openChild, setOpenChild] = React.useState(false);
   
   const handleClick = () => {
     setOpen(!open);
   };
 
+  const handleChildClick = () => {
+    setOpenChild(!openChild);
+  };
+
   const handleChange = (event) => {
-    // console.log("Before Update......");
-    // dispatch(update_json(event.target.id, event.target.value));
-    // console.log("After Update......");  
-    
-    // console.log(json);
-    
-    // setJson({...json, 
-    //       jsonData: {
-    //           [event.target.id]: event.target.value
-    //   }});
 
-    // setJson({     
-    //   ...json,
-    //   [event.target.id]: event.target.value
-    // });
+    const name = event.target.name;
+    const value = event.target.value;
 
-    // setJson({
-    //   json: {
-    //     ...json,
-    //     [event.target.id]: {           
-    //       [event.target.id]: event.target.value
-    //     }  
-    //   }
-    // });
-
-    setJson(updateObject(json, event.target.name.split('.'), event.target.value));
+    setJson(draft => {
+      draft.[name]= value;
+    });
     
-    
-  }
+  } 
 
-  // This is to set Redux Store JSON into a React Hooks Json Object
   useEffect(() => {
-    setJson(data);
-    setJsonLength(length);
-  }, [data]);
+    console.log(json);
 
-  // useEffect(() => {  
-  //  console.log("......Updated JSON......");
-  //  console.log(json);
-  // }, [json]);
+    console.log(desimplify(json));
+  });
 
   return (
-    <>
-
+    <>     
       {json && (
         <ListItem
           button
@@ -163,45 +129,76 @@ export default function TreeUpdate({
         unmountOnExit
         style={{ paddingLeft: "30px" }}
       >
+        
         <List component="div" style={{ padding: 0 }}>
           {json &&
             Object.keys(json).map((k, i) => {
-              return json[k] != null && typeof json[k] === "object" ? (
-                <TreeUpdate
-                  key={Math.random()}
-                  data={json[k]}
-                  parentName={Array.isArray(json) ? "" : k}
-                  length={Object.keys(json[k]).length}
-                />
-              ) : (
-                <>
-                <Grid container spacing={2}>
-                  <ListItem button className={classes.nested}>
-                    {!Array.isArray(json) ? (
+              
+                      return json[k] != null && typeof json[k] === "object" ? (
+                        // <TreeUpdate
+                        //   key={Math.random()}
+                        //   data={json[k]}
+                        //   parentName={Array.isArray(json) ? "" : k}
+                        //   length={Object.keys(json[k]).length}
+                        // />
                         <>
-                        <Grid item xs={3}>                          
-                            <ListItemText classes={{ root: classes.listItemText }}>
-                              {k}
-                            </ListItemText>
-                        </Grid>
-                        <Grid item xs={2} justify='center'>
-                          <Typography variant="inherit" className={classes.bold}>:</Typography>
-                        </Grid>
+                        {k.toString().replace("root.", "").substr(k.toString().replace("root.", "").lastIndexOf(".")+1) != 'root' &&
+                          <ListItem
+                              button
+                              onClick={handleChildClick}
+                              classes={{ root: classes.listItem }}
+                            >
+                              <ListItemIcon
+                                key={Math.random() * 10}
+                                classes={{ root: classes.listIcon }}
+                              >
+                                <ArrowDropDownIcon />
+                              </ListItemIcon>
+                              <ListItemText key={Math.random() * 10} classes={{ root: classes.listItemText }}>
+                                <b>{Array.isArray(json) ? "" : isNaN(k.toString().replace("root.", "").substr(k.toString().replace("root.", "").lastIndexOf(".") + 1)) ? k.toString().replace("root.", "").substr(k.toString().replace("root.", "").lastIndexOf(".") + 1): "" } </b>
+                                {/* {!openChild && <ShowBrackets data={json} length={jsonLength} />} */}
+                              </ListItemText>
+                            </ListItem>
+                        }
                         </>
-                    ) : (
-                      ""
-                    )}
-                      <Grid item xs={7}>                          
-                          <ListItemText>
-                            {json[k] === null ? "null" : <TextField name={k} defaultValue={json[k].toString() || ''} onChange={handleChange} /> }                            
-                          </ListItemText>
-                      </Grid>
-                  </ListItem>
-                  </Grid>
-                </>
-              );
-            })}
+                      ) : (
+                        <>
+                        
+                        <Grid container spacing={2}>
+                          <ListItem button className={classes.nested}>
+                            {!Array.isArray(json) ? (
+                                <>
+                                <Grid item xs={3}>                          
+                                    <ListItemText classes={{ root: classes.listItemText }}>
+                                      {k.toString().replace("root.", "").substr(k.toString().replace("root.", "").lastIndexOf(".")+1)}
+                                    </ListItemText>
+                                </Grid>
+                                <Grid item xs={2} justify='center'>
+                                  <Typography variant="inherit" className={classes.bold}>:</Typography>
+                                </Grid>
+                                </>
+                            ) : (
+                              ""
+                            )}
+                              <Grid item xs={7}>  
+                                {json[k] === null ? "null" :                         
+                                    <ListItemText>
+                                      {json[k].toString().length < 30 ? 
+                                          <TextField name={k} fullWidth  defaultValue={json[k].toString() || ''}  onChange={handleChange} /> : 
+                                          <TextField name={k} fullWidth  defaultValue={json[k].toString() || ''} multiline rows={2} onChange={handleChange} />
+                                          }
+                                    </ListItemText>
+                                }
+                              </Grid>
+                          </ListItem>
+                          </Grid>
+                        </>
+                      );
+                    }
+            
+            )}
         </List>
+        
       </Collapse>
     </>
   );

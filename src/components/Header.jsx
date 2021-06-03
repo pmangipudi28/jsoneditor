@@ -83,11 +83,9 @@ export default function Header() {
         const fileReader = new FileReader();
         fileReader.readAsText(e.target.files[0], "UTF-8");
         
-        fileReader.onload = e => {
-          
-            console.log(Object.entries[e.target.result]);
-          try{
-              
+        fileReader.onload = e => {         
+            
+          try{              
             dispatch(fetch_json_success(eval(JSON.parse(JSON.stringify(e.target.result)))));
           }
           catch {

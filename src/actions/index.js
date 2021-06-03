@@ -40,6 +40,7 @@ export const updating_json = () => {
 export const update_json = (key, value) => { 
     return {
         type: UPDATE_JSON,
-        payload: {key, value}
+        key: key,
+        value: value
     }
 }
